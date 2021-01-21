@@ -2,12 +2,13 @@ package org.opencv.core;
 
 import java.nio.ByteBuffer;
 import java.io.Closeable;
+import java.io.IOException;
 
 // C++: class Mat
 //javadoc: Mat
 public class Mat implements Closeable {
 
-    public final long nativeObj;
+    public long nativeObj;
 
     public Mat(long addr) {
         if (addr == 0)
