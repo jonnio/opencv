@@ -539,7 +539,7 @@ public class Converters {
         for (Mat mi : mats) {
             MatOfPoint pt = new MatOfPoint(mi);
             pts.add(pt);
-            mi.release();
+            mi.close();
         }
         mats.clear();
     }
@@ -557,7 +557,7 @@ public class Converters {
         for (Mat mi : mats) {
             MatOfPoint2f pt = new MatOfPoint2f(mi);
             pts.add(pt);
-            mi.release();
+            mi.close();
         }
         mats.clear();
     }
@@ -588,7 +588,7 @@ public class Converters {
         for (Mat mi : mats) {
             MatOfPoint3f pt = new MatOfPoint3f(mi);
             pts.add(pt);
-            mi.release();
+            mi.close();
         }
         mats.clear();
     }
@@ -631,7 +631,7 @@ public class Converters {
         for (Mat mi : mats) {
             MatOfKeyPoint vkp = new MatOfKeyPoint(mi);
             kps.add(vkp);
-            mi.release();
+            mi.close();
         }
         mats.clear();
     }
@@ -731,7 +731,7 @@ public class Converters {
         for (Mat mi : mats) {
             MatOfDMatch vdm = new MatOfDMatch(mi);
             lvdm.add(vdm);
-            mi.release();
+            mi.close();
         }
         mats.clear();
     }
@@ -762,7 +762,7 @@ public class Converters {
             List<Byte> lb = new ArrayList<Byte>();
             Mat_to_vector_char(mi, lb);
             llb.add(lb);
-            mi.release();
+            mi.close();
         }
         mats.clear();
     }

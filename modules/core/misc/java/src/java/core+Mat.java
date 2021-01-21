@@ -1,10 +1,11 @@
 package org.opencv.core;
 
 import java.nio.ByteBuffer;
+import java.io.Closeable;
 
 // C++: class Mat
 //javadoc: Mat
-public class Mat {
+public class Mat implements Closeable {
 
     public final long nativeObj;
 
@@ -736,9 +737,12 @@ public class Mat {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        n_delete(nativeObj);
-        super.finalize();
+    public void close() throws IOException {
+        if (nativeObj != 0) {
+            release();
+            n_delete(nativeObj);
+            nativeObj = 0;
+        }
     }
 
     // javadoc:Mat::toString()
