@@ -754,7 +754,7 @@ class JavaWrapperGenerator(object):
                         if "O" in a.out:
                             if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
                                 j_epilogue.append("Converters.Mat_to_%(t)s(%(n)s_mat, %(n)s);" % {"t" : a.ctype, "n" : a.name})
-                                j_epilogue.append( "%s_mat.close();" % a.name )
+                                j_epilogue.append( "try { %s_mat.close(); } catch (java.lang.Exception e) { throw new java.lang.RuntimeException(e); }" % a.name )
                             c_epilogue.append( "%(t)s_to_Mat( %(n)s, %(n)s_mat );" % {"n" : a.name, "t" : a.ctype} )
                     else: #pass as list
                         jn_args.append  ( ArgInfo([ a.ctype, a.name, "", [], "" ]) )
