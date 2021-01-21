@@ -1,8 +1,6 @@
 package org.opencv.core;
 
 import java.nio.ByteBuffer;
-import java.io.Closeable;
-import java.io.IOException;
 
 // C++: class Mat
 //javadoc: Mat
@@ -738,7 +736,7 @@ public class Mat implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (nativeObj != 0) {
             release();
             n_delete(nativeObj);
