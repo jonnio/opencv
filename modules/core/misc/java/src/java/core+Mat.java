@@ -747,15 +747,18 @@ public class Mat implements Closeable {
     // javadoc:Mat::toString()
     @Override
     public String toString() {
-        String _dims = (dims() > 0) ? "" : "-1*-1*";
-        for (int i=0; i<dims(); i++) {
-            _dims += size(i) + "*";
-        }
-        return "Mat [ " + _dims + CvType.typeToString(type()) +
+        if (this.nativeObj != 0) {
+            String _dims = (dims() > 0) ? "" : "-1*-1*";
+            for (int i = 0; i < dims(); i++) {
+                _dims += size(i) + "*";
+            }
+            return "Mat [ " + _dims + CvType.typeToString(type()) +
                 ", isCont=" + isContinuous() + ", isSubmat=" + isSubmatrix() +
                 ", nativeObj=0x" + Long.toHexString(nativeObj) +
                 ", dataAddr=0x" + Long.toHexString(dataAddr()) +
                 " ]";
+        }
+        return "Mat disposed";
     }
 
     // javadoc:Mat::dump()
