@@ -754,8 +754,8 @@ class JavaWrapperGenerator(object):
                         if "O" in a.out:
                             if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
                                 j_epilogue.append("Converters.Mat_to_%(t)s(%(n)s_mat, %(n)s); //?2" % {"t" : a.ctype, "n" : a.name})
-                                j_epilogue.append( "%s_mat.close();" % a.name )
-                            c_epilogue.append( "%(t)s_to_Mat( %(n)s, %(n)s_mat );" % {"n" : a.name, "t" : a.ctype} )
+                                j_epilogue.append( "%s_mat.close(); //?5" % a.name )
+                            c_epilogue.append( "%(t)s_to_Mat( %(n)s, %(n)s_mat ); //?7" % {"n" : a.name, "t" : a.ctype} )
                     else: #pass as list
                         jn_args.append  ( ArgInfo([ a.ctype, a.name, "", [], "" ]) )
                         jni_args.append ( ArgInfo([ a.ctype, "%s_list" % a.name , "", [], "" ]) )
@@ -887,7 +887,7 @@ class JavaWrapperGenerator(object):
                     else:
                         ret_val = "Mat retValMat = new Mat("
                         j_prologue.append( j_type + ' retVal = new Array' + j_type+'();')
-                        j_epilogue.append('Converters.Mat_to_' + ret_type + '(retValMat, retVal);')
+                        j_epilogue.append('Converters.Mat_to_' + ret_type + '(retValMat, retVal); //?6')
                         ret = "return retVal;"
             elif ret_type.startswith("Ptr_"):
                 constructor = type_dict[ret_type]["j_type"] + ".__fromPtr__("
