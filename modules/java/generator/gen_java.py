@@ -1169,7 +1169,6 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
         close();
     }
 
-    @Override
     public void close() {
         if (nativeObj != 0L) {
             delete(nativeObj);
