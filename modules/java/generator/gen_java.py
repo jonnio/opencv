@@ -739,10 +739,10 @@ class JavaWrapperGenerator(object):
                         if "I" in a.out or not a.out:
                             if type_dict[a.ctype]["v_type"] == "vector_Mat":
                                 j_prologue.append( "List<Mat> %(n)s_tmplm = new ArrayList<Mat>((%(n)s != null) ? %(n)s.size() : 0);" % {"n" : a.name } )
-                                j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s, %(n)s_tmplm);" % {"n" : a.name, "t" : a.ctype} )
+                                j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s, %(n)s_tmplm); //?1" % {"n" : a.name, "t" : a.ctype} )
                             else:
                                 if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                    j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s);" % {"n" : a.name, "t" : a.ctype} )
+                                    j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s); //?3" % {"n" : a.name, "t" : a.ctype} )
                                 else:
                                     j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                             c_prologue.append( "Mat_to_%(t)s( %(n)s_mat, %(n)s );" % {"n" : a.name, "t" : a.ctype} )
@@ -753,7 +753,7 @@ class JavaWrapperGenerator(object):
                                 j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                         if "O" in a.out:
                             if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                j_epilogue.append("Converters.Mat_to_%(t)s(%(n)s_mat, %(n)s);" % {"t" : a.ctype, "n" : a.name})
+                                j_epilogue.append("Converters.Mat_to_%(t)s(%(n)s_mat, %(n)s); //?2" % {"t" : a.ctype, "n" : a.name})
                                 j_epilogue.append( "%s_mat.close();" % a.name )
                             c_epilogue.append( "%(t)s_to_Mat( %(n)s, %(n)s_mat );" % {"n" : a.name, "t" : a.ctype} )
                     else: #pass as list
@@ -1165,7 +1165,11 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
 """
     @Override
     protected void finalize() throws Throwable {
-        delete(nativeObj);
+        if (this.nativeObj != 0L) {
+            this.release();
+            n_delete(this.nativeObj);
+            this.nativeObj = 0L;
+        }
     }
 """ )
 
