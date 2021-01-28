@@ -1161,7 +1161,7 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
                 ci.cpp_code.write("\n".join(fn["cpp_code"]))
 
         if ci.name != self.Module or ci.base:
-            # finalize()
+            # close()
             ci.j_code.write(
 """
     @Override
@@ -1172,19 +1172,33 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
             this.nativeObj = 0L;
         }
     }
+
+    @Override
+    public void close() {
+        if (nativeObj != 0L) {
+            release();
+            n_delete(nativeObj);
+            nativeObj = 0L;
+        }
+    }
+
+    public boolean isClosed() {
+        return nativeObj == 0L;
+    }
+    
 """ )
 
             ci.jn_code.write(
 """
-    // native support for java finalize()
+    // native support for java close()
     private static native void delete(long nativeObj);
 """ )
 
-            # native support for java finalize()
+            # native support for java close()
             ci.cpp_code.write(
 """
 //
-//  native support for java finalize()
+//  native support for java close()
 //  static void %(cls)s::delete( __int64 self )
 //
 JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete(JNIEnv*, jclass, jlong);
