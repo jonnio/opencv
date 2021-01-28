@@ -742,13 +742,14 @@ class JavaWrapperGenerator(object):
                                 j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s, %(n)s_tmplm); //?1" % {"n" : a.name, "t" : a.ctype} )
                             else:
                                 if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                    j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s); //?3" % {"n" : a.name, "t" : a.ctype} )
+                                    j_prologue.append( "try (Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s)) { //?3" % {"n" : a.name, "t" : a.ctype} )
+                                    j_epilogue.append( "} //?3-close" )
                                 else:
                                     j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                             c_prologue.append( "Mat_to_%(t)s( %(n)s_mat, %(n)s );" % {"n" : a.name, "t" : a.ctype} )
                         else:
                             if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                j_prologue.append( "Mat %s_mat = new Mat();" % a.name )
+                                j_prologue.append( "Mat %s_mat = new Mat(); //?9" % a.name )
                             else:
                                 j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                         if "O" in a.out:
