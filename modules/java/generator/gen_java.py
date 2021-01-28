@@ -928,7 +928,7 @@ class JavaWrapperGenerator(object):
             if fi.classname:
                 static = fi.static
 
-            j_code_twr_whitespace = "\n        ".join(((""),*len(j_twr_epilogue))) if j_twr_epilogue else ""
+            j_code_twr_whitespace = "\n        ".join(((""),)*len(j_twr_epilogue)) if j_twr_epilogue else ""
             j_code.write( Template(
 """    public $static$j_type$j_name($j_args) {$prologue
         $ret_val$jn_name($jn_args_call)$tail;$epilogue$ret$twr
