@@ -744,6 +744,10 @@ public class Mat implements Closeable {
         }
     }
 
+    public boolean isClosed() {
+        return nativeObj == 0L;
+    }
+
     // javadoc:Mat::toString()
     @Override
     public String toString() {

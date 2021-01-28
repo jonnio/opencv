@@ -1166,18 +1166,13 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
 """
     @Override
     protected void finalize() throws Throwable {
-        if (this.nativeObj != 0L) {
-            this.release();
-            n_delete(this.nativeObj);
-            this.nativeObj = 0L;
-        }
+        close();
     }
 
     @Override
     public void close() {
         if (nativeObj != 0L) {
-            release();
-            n_delete(nativeObj);
+            delete(nativeObj);
             nativeObj = 0L;
         }
     }
@@ -1185,7 +1180,7 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
     public boolean isClosed() {
         return nativeObj == 0L;
     }
-    
+
 """ )
 
             ci.jn_code.write(
@@ -1201,6 +1196,14 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
 //  native support for java close()
 //  static void %(cls)s::delete( __int64 self )
 //
+JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete(JNIEnv*, jclass, jlong);
+
+JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete
+  (JNIEnv*, jclass, jlong self)
+{
+    delete (%(cls)s*) self;
+}
+
 JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete(JNIEnv*, jclass, jlong);
 
 JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete
