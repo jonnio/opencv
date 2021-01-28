@@ -712,6 +712,8 @@ class JavaWrapperGenerator(object):
             jni_args = [ArgInfo([ "env", "env", "", [], "" ]), ArgInfo([ "cls", "", "", [], "" ])]
             j_prologue = []
             j_epilogue = []
+            #try-with-resources closures
+            j_twr_epilogue = []
             c_prologue = []
             c_epilogue = []
             if type_dict[fi.ctype]["jni_type"] == "jdoubleArray":
@@ -743,7 +745,7 @@ class JavaWrapperGenerator(object):
                             else:
                                 if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
                                     j_prologue.append( "try (Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s)) { //?3" % {"n" : a.name, "t" : a.ctype} )
-                                    j_epilogue.append( "} //?3-close" )
+                                    j_twr_epilogue.append( "} //?3-close" )
                                 else:
                                     j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                             c_prologue.append( "Mat_to_%(t)s( %(n)s_mat, %(n)s );" % {"n" : a.name, "t" : a.ctype} )
@@ -926,17 +928,19 @@ class JavaWrapperGenerator(object):
             if fi.classname:
                 static = fi.static
 
+            j_code_twr_whitespace = "\n        ".join(((""),*len(j_twr_epilogue))) if j_twr_epilogue else ""
             j_code.write( Template(
 """    public $static$j_type$j_name($j_args) {$prologue
-        $ret_val$jn_name($jn_args_call)$tail;$epilogue$ret
+        $ret_val$jn_name($jn_args_call)$tail;$epilogue$ret$twr
     }
 
 """
                 ).substitute(
-                    ret = "\n        " + ret if ret else "",
+                    twr = "\n        " + "\n        ".join(j_twr_epilogue) if j_twr_epilogue else "",
+                    ret = "\n        " + j_code_twr_whitespace + ret if ret else "",
                     ret_val = ret_val,
                     tail = tail,
-                    prologue = "\n        " + "\n        ".join(j_prologue) if j_prologue else "",
+                    prologue = "\n        " + j_code_twr_whitespace + "\n        ".join(j_prologue) if j_prologue else "",
                     epilogue = "\n        " + "\n        ".join(j_epilogue) if j_epilogue else "",
                     static = static + " " if static else "",
                     j_type=type_dict[fi.ctype]["j_type"] + " " if type_dict[fi.ctype]["j_type"] else "",
