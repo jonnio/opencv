@@ -741,24 +741,25 @@ class JavaWrapperGenerator(object):
                         if "I" in a.out or not a.out:
                             if type_dict[a.ctype]["v_type"] == "vector_Mat":
                                 j_prologue.append( "List<Mat> %(n)s_tmplm = new ArrayList<Mat>((%(n)s != null) ? %(n)s.size() : 0);" % {"n" : a.name } )
-                                j_prologue.append( "Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s, %(n)s_tmplm); //?1" % {"n" : a.name, "t" : a.ctype} )
+                                j_prologue.append( "try (Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s, %(n)s_tmplm)) {" % {"n" : a.name, "t" : a.ctype} )
+                                j_twr_epilogue.append( "}" )
                             else:
                                 if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                    j_prologue.append( "try (Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s)) { //?3" % {"n" : a.name, "t" : a.ctype} )
-                                    j_twr_epilogue.append( "} //?3-close" )
+                                    j_prologue.append( "try (Mat %(n)s_mat = Converters.%(t)s_to_Mat(%(n)s)) {" % {"n" : a.name, "t" : a.ctype} )
+                                    j_twr_epilogue.append( "}" )
                                 else:
                                     j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                             c_prologue.append( "Mat_to_%(t)s( %(n)s_mat, %(n)s );" % {"n" : a.name, "t" : a.ctype} )
                         else:
                             if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                j_prologue.append( "Mat %s_mat = new Mat(); //?9" % a.name )
+                                j_prologue.append( "try (Mat %s_mat = new Mat()) {" % a.name )
+                                j_twr_epilogue.append( "}" )
                             else:
                                 j_prologue.append( "Mat %s_mat = %s;" % (a.name, a.name) )
                         if "O" in a.out:
                             if not type_dict[a.ctype]["j_type"].startswith("MatOf"):
-                                j_epilogue.append("Converters.Mat_to_%(t)s(%(n)s_mat, %(n)s); //?2" % {"t" : a.ctype, "n" : a.name})
-                                j_epilogue.append( "%s_mat.close(); //?5" % a.name )
-                            c_epilogue.append( "%(t)s_to_Mat( %(n)s, %(n)s_mat ); //?7" % {"n" : a.name, "t" : a.ctype} )
+                                j_epilogue.append("Converters.Mat_to_%(t)s(%(n)s_mat, %(n)s);" % {"t" : a.ctype, "n" : a.name})
+                            c_epilogue.append( "%(t)s_to_Mat( %(n)s, %(n)s_mat );" % {"n" : a.name, "t" : a.ctype} )
                     else: #pass as list
                         jn_args.append  ( ArgInfo([ a.ctype, a.name, "", [], "" ]) )
                         jni_args.append ( ArgInfo([ a.ctype, "%s_list" % a.name , "", [], "" ]) )
@@ -890,7 +891,7 @@ class JavaWrapperGenerator(object):
                     else:
                         ret_val = "Mat retValMat = new Mat("
                         j_prologue.append( j_type + ' retVal = new Array' + j_type+'();')
-                        j_epilogue.append('Converters.Mat_to_' + ret_type + '(retValMat, retVal); //?6')
+                        j_epilogue.append('Converters.Mat_to_' + ret_type + '(retValMat, retVal);')
                         ret = "return retVal;"
             elif ret_type.startswith("Ptr_"):
                 constructor = type_dict[ret_type]["j_type"] + ".__fromPtr__("
@@ -928,7 +929,9 @@ class JavaWrapperGenerator(object):
             if fi.classname:
                 static = fi.static
 
-            j_code_twr_whitespace = "\n        ".join(((""),)*len(j_twr_epilogue)) if j_twr_epilogue else ""
+            j_code_spaces = "        "
+            j_code_whitespace = "\n" + j_code_spaces
+            j_code_twr_whitespace = j_code_spaces.join(['']*(len(j_twr_epilogue)+1)) if j_twr_epilogue else ""
             j_code.write( Template(
 """    public $static$j_type$j_name($j_args) {$prologue
         $ret_val$jn_name($jn_args_call)$tail;$epilogue$ret$twr
@@ -936,12 +939,12 @@ class JavaWrapperGenerator(object):
 
 """
                 ).substitute(
-                    twr = "\n        " + "\n        ".join(j_twr_epilogue) if j_twr_epilogue else "",
-                    ret = "\n        " + j_code_twr_whitespace + ret if ret else "",
-                    ret_val = ret_val,
+                    twr = j_code_whitespace + j_code_whitespace.join(j_twr_epilogue) if j_twr_epilogue else "",
+                    ret = j_code_whitespace + j_code_twr_whitespace + ret if ret else "",
+                    ret_val = j_code_twr_whitespace + ret_val,
                     tail = tail,
-                    prologue = "\n        " + j_code_twr_whitespace + "\n        ".join(j_prologue) if j_prologue else "",
-                    epilogue = "\n        " + "\n        ".join(j_epilogue) if j_epilogue else "",
+                    prologue = j_code_whitespace + j_code_whitespace.join(j_prologue) if j_prologue else "",
+                    epilogue = j_code_whitespace + j_code_twr_whitespace + j_code_whitespace.join(j_epilogue) if j_epilogue else "",
                     static = static + " " if static else "",
                     j_type=type_dict[fi.ctype]["j_type"] + " " if type_dict[fi.ctype]["j_type"] else "",
                     j_name=fi.jname,
@@ -1199,14 +1202,6 @@ JNIEXPORT $rtype JNICALL Java_org_opencv_${module}_${clazz}_$fname
 //  native support for java close()
 //  static void %(cls)s::delete( __int64 self )
 //
-JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete(JNIEnv*, jclass, jlong);
-
-JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete
-  (JNIEnv*, jclass, jlong self)
-{
-    delete (%(cls)s*) self;
-}
-
 JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete(JNIEnv*, jclass, jlong);
 
 JNIEXPORT void JNICALL Java_org_opencv_%(module)s_%(j_cls)s_delete
