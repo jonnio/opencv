@@ -29,7 +29,7 @@
             "minMaxLoc" : {
                 "j_code"   : [
                     "// manual port",
-                    "public static class MinMaxLocResult {",
+                    "public static class MinMaxLocResult implements java.io.Serializable {",
                     "    public double minVal;",
                     "    public double maxVal;",
                     "    public Point minLoc;",
@@ -46,6 +46,11 @@
                     "        this.maxVal=maxVal;",
                     "        this.minLoc=minLoc!=null ? minLoc : new Point();",
                     "        this.maxLoc=maxLoc!=null ? maxLoc : new Point();",
+                    "    }",
+                    "\n",
+                    "    @Override",
+                    "    public String toString() {",
+                    "        return \"{\" + minVal + \", \" + minLoc + \", \" + maxVal + \", \" + maxLoc + \"}\";",
                     "    }",
                     "}",
                     "\n",

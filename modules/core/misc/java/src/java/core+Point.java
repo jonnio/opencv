@@ -1,7 +1,7 @@
 package org.opencv.core;
 
 //javadoc:Point_
-public class Point {
+public class Point implements java.io.Serializable {
 
     public double x, y;
 
