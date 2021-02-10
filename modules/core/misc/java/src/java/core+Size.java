@@ -1,7 +1,7 @@
 package org.opencv.core;
 
 //javadoc:Size_
-public class Size {
+public class Size implements java.io.Serializable {
 
     public double width, height;
 
